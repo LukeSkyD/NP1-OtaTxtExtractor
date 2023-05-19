@@ -9,4 +9,4 @@ HOW TO USE
 4. Gain root priviledges with the command ```su```
 5. Run the script with the command ```sh /sdcard/run.sh```
 6. Wait for the program to finish
-7. ota.txt can now be found in ```/sdcard/```
+7. ota.txt has been saved in your phone, in memory's root
