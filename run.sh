@@ -60,9 +60,47 @@ if [ -f "$ota" ]; then
         exit 1
     fi
 else
-    # Print error message
+    # if not found searches for the latest modified NTota_*.tar.gz file
     echo "OtaTxtExtractor: ota.txt not found in /mnt/product/nt_log/*/ folder"
-    exit 1
+    echo "OtaTxtExtractor: searching for NTota_*.tar.gz file"
+    # Searches with ls command the location of NTota_*.tar.gz and saves it to a variable
+    ota=$(ls -t /mnt/product/nt_log/ota_log/NTota_*.tar.gz | head -1)
+
+    # Check if NTota_*.tar.gz is found
+    if [ -f "$ota" ]; then
+        echo "OtaTxtExtractor: NTota_*.tar.gz found in /mnt/product/nt_log/ota_log/ folder"
+        echo "OtaTxtExtractor: extracting from NTota_*.tar.gz"
+        # Extract ota.txt from NTota_*.tar.gz to /sdcard/ota.txt
+        mkdir /sdcard/OTE/
+        tar -xzf "$ota" -C /sdcard/OTE/ 2> error
+
+        # Check if error variable is not empty
+        if [ -n "$error" ]; then
+            # Print error message
+            echo "OtaTxtExtractor: tar command failed"
+            echo "OtaTxtExtractor: error message: $error"
+            echo "OtaTxtExtractor: exiting"
+            exit 1
+        fi
+
+        # Check if ota.txt is present in /sdcard/OTE/
+        ota=$(find /sdcard/OTE/ -name ota.txt -print -quit 2> error)
+        if [ -f "$ota" ]; then
+            # Print success message
+            cp "$ota" /sdcard/ota.txt 2> error
+            rm -rf /sdcard/OTE/
+            echo "OtaTxtExtractor: ota.txt succesfully extracted to /sdcard/ota.txt !!!"
+        else
+            # Print error message
+            echo "OtaTxtExtractor: ota.txt not extracted to /sdcard/OTE/"
+            exit 1
+        fi
+    else
+        # Print error message
+        echo "OtaTxtExtractor: Cannot find ota.txt or NTota_*.tar.gz"
+        echo "exiting..."
+        exit 1
+    fi
 fi
 
 exit 0
